@@ -98,6 +98,8 @@ def least_squares_GD(y, tx, initial_w, max_iters, gamma):
 def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     """Linear regression using stochastic gradient descent
     
+    
+    
     Args:
         y: 
         tx: 
@@ -109,10 +111,19 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
        
     
     """
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # TODO
-    # ***************************************************    
+    w = initial_w
+    data_size = len(y)
+    
+    for n in range(max_iters):
+        # as batch_size and num_batch are both 1, a batch creator (given from the labs) will only given
+        # back one sample (the FIRST sample), given the batch creator shuffles the dataset before it 
+        # gives back the one sample, this is equal to just pick a random sample
+        # --->>> this means to maximize the possibility to train with every sample the max iteration
+        # should be a lot higher then the data_size
+        grad = compute_GD(y, tx, w)
+        w = w - gamma * grad
+    loss = calculate_loss_mse(y, tx, w)
+    return loss, w
     
     
     
