@@ -120,7 +120,8 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
         # gives back the one sample, this is equal to just pick a random sample
         # --->>> this means to maximize the possibility to train with every sample the max iteration
         # should be a lot higher then the data_size
-        grad = compute_GD(y, tx, w)
+        i = np.random.randint(low=0, high=data_size, size=1)
+        grad = compute_GD(y[i], tx[i], w)
         w = w - gamma * grad
     loss = calculate_loss_mse(y, tx, w)
     return loss, w
