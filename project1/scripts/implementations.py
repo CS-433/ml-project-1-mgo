@@ -57,6 +57,20 @@ def compute_loss_mae(y, tx, w):
     
     
     
+def compute_GD(y, tx, gamma):
+    """Compute the gradient descent
+    
+    Args:
+        y: expected values
+        tx: inputs
+        gamma: step-size > 0
+        
+    Returns:
+       gradient
+    """
+    err = y - tx.dot(w)
+    grad = - tx.T.dot(err) / len(err)
+    return grad
     
 def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     """Linear regression using gradient descent
@@ -72,11 +86,12 @@ def least_squares_GD(y, tx, initial_w, max_iters, gamma):
        
     
     """
-     # ***************************************************
-    # INSERT YOUR CODE HERE
-    # TODO
-    # ***************************************************
-
+    w = initial_w
+    for n in range(max_iters):
+        grad = compute_GD(y, tx, w)
+        w = w - gamma * grad
+    loss = calculate_loss_mse(y, tx, w)
+    return loss, w
     
     
 
@@ -123,18 +138,20 @@ def ridge_regression(y, tx, lambda_):
      """Ridge regression using normal equations.
 
     Args:
-        y: 
-        tx: 
-        lambda_:
+        y: expected results
+        tx: inputs
+        lambda_: regularization parameter
 
     Returns:
         optimal weights and loss with normal equation.
     """
-    
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # TODO
-    # ***************************************************
+    (N, p) = x.shape
+    lambda1 = 2 * N * lambda_
+    a = tx.T.dot(tx) + lambda1 * np.eye(p)
+    b = tx.T.dot(y)
+    w = np.linalg.solve(a, b)
+    mse = compute_loss_mse(y, tx, w)
+    return w, mse
     
     
     
@@ -142,11 +159,11 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
      """Logistic regression using gradient descent or SGD
     
     Args:
-        y: 
-        tx: 
-        initial_w:
-        max_iters:
-        gamma:
+        y: expected results
+        tx: inputs
+        initial_w: initial weight vector
+        max_iters: number of steps to run
+        gamma: step-size
         
     Returns:
        
@@ -164,11 +181,11 @@ def reg_logistic_regression(y, tx, initial_w, max_iters, gamma):
      """Regularized Logistic regression using gradient descent or SGD
     
     Args:
-        y: 
-        tx: 
-        initial_w:
-        max_iters:
-        gamma:
+        y: expected results
+        tx: inputs
+        initial_w: initial weight vector
+        max_iters: number of steps to run
+        gamma: step-size
         
     Returns:
        
