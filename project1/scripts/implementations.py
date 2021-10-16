@@ -145,7 +145,7 @@ def ridge_regression(y, tx, lambda_):
     Returns:
         optimal weights and loss with normal equation.
     """
-    (N, p) = x.shape
+    (N, p) = tx.shape
     lambda1 = 2 * N * lambda_
     a = tx.T.dot(tx) + lambda1 * np.eye(p)
     b = tx.T.dot(y)
