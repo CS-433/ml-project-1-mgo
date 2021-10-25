@@ -164,9 +164,27 @@ def ridge_regression(y, tx, lambda_):
     w = np.linalg.solve(a, b)
     mse = compute_loss_mse(y, tx, w)
     return w, mse
+
+
+def sigmoid(t):
+    """apply sigmoid function on t."""
+    return 1.0 / (1 + np.exp(-t))
+
+
+def calculate_gradient(y, tx, w):
+    """compute the gradient of loss."""
+    pred = sigmoid(tx.dot(w))
+    grad = tx.T.dot(pred - y)
+    return grad
+
+
+def calculate_loss(y, tx, w):
+    """compute the cost by negative log likelihood."""
+    pred = sigmoid(tx.dot(w))
+    loss = y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred))
+    return np.squeeze(- loss)
     
-    
-    
+  
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
      """Logistic regression using gradient descent or SGD
     
@@ -181,16 +199,23 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
        
     
     """
+    losses = []
+    w = initial_w
+    for iter in range(max_iter):
+        """
+        Do one step of gradient descent using logistic regression.
+        Return the loss and the updated w.
+        """
+        loss = calculate_loss(y, tx, w)
+        grad = calculate_gradient(y, tx, w)
+        w -= gamma * grad
+    return losses, w
     
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # TODO
-    # ***************************************************
     
     
     
 def reg_logistic_regression(y, tx, initial_w, max_iters, gamma):
-     """Regularized Logistic regression using gradient descent or SGD
+    """Regularized Logistic regression using gradient descent or SGD
     
     Args:
         y: expected results
@@ -203,8 +228,55 @@ def reg_logistic_regression(y, tx, initial_w, max_iters, gamma):
        
     
     """
+    w = initial_w
+    losses = []
+    for iter in range(max_iter):
+        """return the loss and gradient."""
+        num_samples = y.shape[0]
+        loss = calculate_loss(y, tx, w) + lambda_ * np.squeeze(w.T.dot(w))
+        losses.append(loss)
+        gradient = calculate_gradient(y, tx, w) + 2 * lambda_ * w
+        """
+        Do one step of gradient descent, using the penalized logistic regression.
+        Return the loss and updated w.
+        """
+        w -= gamma * gradient
+    return losses, w
     
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # TODO
-    # ***************************************************
+
+def calculate_hessian(y, tx, w):
+    """return the Hessian of the loss function."""
+    pred = sigmoid(tx.dot(w))
+    pred = np.diag(pred.T[0])
+    r = np.multiply(pred, (1-pred))
+    return tx.T.dot(r).dot(tx)
+
+
+def learning_by_newton_methody(y, tx, initial_w, max_iters, gamma):
+    """Regularized Logistic regression using gradient descent or SGD
+    
+    Args:
+        y: expected results
+        tx: inputs
+        initial_w: initial weight vector
+        max_iters: number of steps to run
+        gamma: step-size
+        
+    Returns:
+       
+    
+    """
+    w = initial_w
+    losses = []
+    for iter in range(max_iter):
+        """
+        Do one step of Newton's method.
+        Return the loss and updated w.
+        """
+        loss = calculate_loss(y, tx, w)
+        gradient = calculate_gradient(y, tx, w)
+        hessian = calculate_hessian(y, tx, w)
+        w -= gamma * np.linalg.solve(hessian, gradient)
+    return losses, w
+    
+    
