@@ -58,3 +58,30 @@ def visualization(y, x, mean_x, std_x):
     ax2.set_ylim([min(x[:, 1]), max(x[:, 1])])
     plt.tight_layout()
     plt.savefig(save_name+".pdf")
+    
+def vis_conf_mtx(conf_mtx):
+    """
+    Visualize the confusion matrix
+    :param conf_mtx:
+    :return:
+    """
+
+    fig, ax = plt.subplots()
+    im = ax.imshow(conf_mtx)
+    s = conf_mtx.shape[0]
+    # We want to show all ticks...
+    ax.set_xticks(np.arange(s))
+    ax.set_yticks(np.arange(s))
+    # ... and label them with the respective list entries
+    ax.set_xticklabels([1, 0])
+    ax.set_yticklabels([1, 0])
+
+    # Loop over data dimensions and create text annotations.
+    for i in range(s):
+        for j in range(s):
+            text = ax.text(j, i, conf_mtx[i, j],
+                           ha="center", va="center", color="w")
+
+    ax.set_title("Harvest of local farmers (in tons/year)")
+    fig.tight_layout()
+    plt.show()
