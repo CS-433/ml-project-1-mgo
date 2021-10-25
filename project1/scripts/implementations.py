@@ -207,9 +207,10 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         Return the loss and the updated w.
         """
         loss = calculate_loss(y, tx, w)
+        losses.append(loss)
         grad = calculate_gradient(y, tx, w)
         w -= gamma * grad
-    return losses, w
+    return loss, w
     
     
     
@@ -241,7 +242,7 @@ def reg_logistic_regression(y, tx, initial_w, max_iters, gamma):
         Return the loss and updated w.
         """
         w -= gamma * gradient
-    return losses, w
+    return loss, w
     
 
 def calculate_hessian(y, tx, w):
@@ -274,9 +275,10 @@ def learning_by_newton_method(y, tx, initial_w, max_iters, gamma):
         Return the loss and updated w.
         """
         loss = calculate_loss(y, tx, w)
+        losses.append(loss)
         gradient = calculate_gradient(y, tx, w)
         hessian = calculate_hessian(y, tx, w)
         w -= gamma * np.linalg.solve(hessian, gradient)
-    return losses, w
+    return loss, w
     
     
