@@ -252,8 +252,8 @@ def calculate_hessian(y, tx, w):
     return tx.T.dot(r).dot(tx)
 
 
-def learning_by_newton_methody(y, tx, initial_w, max_iters, gamma):
-    """Regularized Logistic regression using gradient descent or SGD
+def learning_by_newton_method(y, tx, initial_w, max_iters, gamma):
+    """Newton's method
     
     Args:
         y: expected results
