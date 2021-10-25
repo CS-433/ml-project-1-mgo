@@ -28,14 +28,14 @@ def build_k_indices(y, k_fold, seed):
     return np.array(k_indices)
 
 
-def cross_validation(y, x, k_indices, k, method_train, method_loss *args):
+def cross_validation(y, x, k_indices, k, method_train, method_loss, *args):
     """
     run on given fold
     use this to do cross validation (run over every k-fold in main)
     return the loss of the given method.
     method must return weights and loss.
     args must be the correct arguments for the mehtod
-    """    
+    """
     test_idx = k_indices[k]
     train_idx = k_indices[~(np.arange(k_indices.shape[0]) == k)]
     train_idx = train_idx.reshape(-1)
@@ -45,10 +45,54 @@ def cross_validation(y, x, k_indices, k, method_train, method_loss *args):
     x_train = x[train_idx]
     
     w, train_loss = method_train(y_train, x_train, *args)
-    test_loss = method_test(y_test, x_train, w)
+    test_loss = method_loss(y_test, x_train, w)
     
     return w, train_loss, test_loss
+
+
+def confusion_mat(tp, tn, fp, fn):
+    """
+    Inputs are the labels y and the predictions.
+    Creates a confusion matrix (y-axes: actual class, x-class: predicted class)
+    Size of 2x2.
+    """
+    conf_mtx = np.array([[tp, fn], [fp, tn]])
+    return conf_mtx
     
+
+def calc_rates(y, p):
+    tn = sum((p == 0) & (p == y))  # prediction 0 and the same as the label -> true negative
+    tp = sum((p == 1) & (p == y))  # prediction 1 and the same as the label -> true positive
+    fn = sum((p == 0) & (p != y))  # prediction 0 and not the same as the label -> false negative
+    fp = sum((p == 1) & (p != y))  # prediction 1 and not the same as the label -> false positive
+    return tp, tn, fp, fn
+
+
+def conf_matrix(tp, tn, fp, fn):
+    conf_mtx = np.array([[tp, fn], [fp, tn]])
+    return conf_mtx
+
+
+def recall(tp, fn):
+    tpr = tp / (tp + fn)
+    return tpr
+
+
+def precision(tp, fp):
+    ppv = tp / (tp + fp)
+    return ppv
+
+
+def f_score(beta, recall, precision):
+    """
+    Two commonly used values for β are 2, which weighs recall higher than precision, and 0.5, which weighs recall lower than precision.
+    :param beta:
+    :param recall:
+    :param precision:
+    :return:
+    """
+    f_s = (1 + beta**2) * ((precision * recall) / ((beta**2 * precision) + recall))
+    return f_s
     
     
     
