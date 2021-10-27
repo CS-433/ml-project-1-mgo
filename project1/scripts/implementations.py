@@ -185,10 +185,18 @@ def calculate_loss(y, tx, w):
     pred = sigmoid(tx.dot(w))
     loss = y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred))
     return np.squeeze(- loss)
+<<<<<<< HEAD
     
   
 def logistic_regression(y, tx, initial_w, max_iter, gamma):
     """Logistic regression using gradient descent or SGD
+=======
+
+
+
+def logistic_regression(y, tx, initial_w, max_iters, gamma):
+     """Logistic regression using gradient descent or SGD
+>>>>>>> 10d94456e2cb2fa61b4bf9572b3df86e05bace4a
     
     Args:
         y: expected results
