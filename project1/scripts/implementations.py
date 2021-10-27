@@ -74,14 +74,14 @@ def compute_GD(y, tx, w):
     grad = - tx.T.dot(err) / len(err)
     return grad
     
-def least_squares_GD(y, tx, initial_w, max_iter, gamma):
+def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     """Linear regression using gradient descent
     
     Args:
         y: 
         tx: 
         initial_w:
-        max_iter:
+        max_iters:
         gamma:
         
     Returns:
@@ -89,7 +89,7 @@ def least_squares_GD(y, tx, initial_w, max_iter, gamma):
     
     """
     w = initial_w
-    for n in tqdm(range(max_iter)):
+    for n in tqdm(range(max_iters), desc="In step"):
         grad = compute_GD(y, tx, w)
         w = w - gamma * grad
     loss = compute_loss_mse(y, tx, w)
@@ -97,7 +97,7 @@ def least_squares_GD(y, tx, initial_w, max_iter, gamma):
     
     
 
-def least_squares_SGD(y, tx, initial_w, max_iter, gamma):
+def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     """Linear regression using stochastic gradient descent
     
     
@@ -106,7 +106,7 @@ def least_squares_SGD(y, tx, initial_w, max_iter, gamma):
         y: 
         tx: 
         initial_w:
-        max_iter:
+        max_iters:
         gamma:
         
     Returns:
@@ -116,7 +116,7 @@ def least_squares_SGD(y, tx, initial_w, max_iter, gamma):
     w = initial_w
     data_size = len(y)
     
-    for n in range(max_iter):
+    for n in range(max_iters):
         # as batch_size and num_batch are both 1, a batch creator (given from the labs) will only given
         # back one sample (the FIRST sample), given the batch creator shuffles the dataset before it 
         # gives back the one sample, this is equal to just pick a random sample
@@ -185,24 +185,15 @@ def calculate_loss(y, tx, w):
     pred = sigmoid(tx.dot(w))
     loss = y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred))
     return np.squeeze(- loss)
-<<<<<<< HEAD
-    
-  
-def logistic_regression(y, tx, initial_w, max_iter, gamma):
-    """Logistic regression using gradient descent or SGD
-=======
 
 
-
-def logistic_regression(y, tx, initial_w, max_iters, gamma):
-     """Logistic regression using gradient descent or SGD
->>>>>>> 10d94456e2cb2fa61b4bf9572b3df86e05bace4a
-    
+def logistic_regression(y, tx, initial_w, max_iterss, gamma):
+    """Logistic regression using gradient descent or SGD    
     Args:
         y: expected results
         tx: inputs
         initial_w: initial weight vector
-        max_iter: number of steps to run
+        max_iters: number of steps to run
         gamma: step-size
         
     Returns:
@@ -211,7 +202,7 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     """
     losses = []
     w = initial_w
-    for iter in range(max_iter):
+    for iter in range(max_iters):
         """
         Do one step of gradient descent using logistic regression.
         Return the loss and the updated w.
@@ -225,14 +216,14 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     
     
     
-def reg_logistic_regression(y, tx, initial_w, max_iter, gamma):
+def reg_logistic_regression(y, tx, initial_w, max_iters, gamma):
     """Regularized Logistic regression using gradient descent or SGD
     
     Args:
         y: expected results
         tx: inputs
         initial_w: initial weight vector
-        max_iter: number of steps to run
+        max_iters: number of steps to run
         gamma: step-size
         
     Returns:
@@ -241,7 +232,7 @@ def reg_logistic_regression(y, tx, initial_w, max_iter, gamma):
     """
     w = initial_w
     losses = []
-    for iter in range(max_iter):
+    for iter in range(max_iters):
         """return the loss and gradient."""
         num_samples = y.shape[0]
         loss = calculate_loss(y, tx, w) + lambda_ * np.squeeze(w.T.dot(w))
@@ -263,14 +254,14 @@ def calculate_hessian(y, tx, w):
     return tx.T.dot(r).dot(tx)
 
 
-def learning_by_newton_method(y, tx, initial_w, max_iter, gamma):
+def learning_by_newton_method(y, tx, initial_w, max_iters, gamma):
     """Newton's method
     
     Args:
         y: expected results
         tx: inputs
         initial_w: initial weight vector
-        max_iter: number of steps to run
+        max_iters: number of steps to run
         gamma: step-size
         
     Returns:
@@ -279,7 +270,7 @@ def learning_by_newton_method(y, tx, initial_w, max_iter, gamma):
     """
     w = initial_w
     losses = []
-    for iter in range(max_iter):
+    for iter in range(max_iters):
         """
         Do one step of Newton's method.
         Return the loss and updated w.

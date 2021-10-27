@@ -18,6 +18,24 @@ def de_standardize(x, mean_x, std_x):
     return x
 
 
+def split_data(x, y, ratio, seed=1):
+    """split the dataset based on the split ratio. Into train and validation"""
+    # same seed
+    np.random.seed(seed)
+    # generate random indices
+    no_ex = y.shape[0]
+    indices = np.random.permutation(no_ex)
+    idx_split = int(np.floor(ratio * no_ex))
+    idx_train = indices[: idx_split]
+    idx_val = indices[idx_split:]
+    # create split
+    x_train = x[idx_train]
+    x_val = x[idx_val]
+    y_train = y[idx_train]
+    y_val = y[idx_val]
+    return x_train, x_val, y_train, y_val
+
+
 def build_k_indices(y, k_fold, seed):
     """build k indices for k-fold."""
     num_row = y.shape[0]
@@ -65,6 +83,7 @@ def calc_rates(y, p):
     tp = sum((p == 1) & (p == y))  # prediction 1 and the same as the label -> true positive
     fn = sum((p == 0) & (p != y))  # prediction 0 and not the same as the label -> false negative
     fp = sum((p == 1) & (p != y))  # prediction 1 and not the same as the label -> false positive
+    print("TP: {}, TN: {}, FP: {}, FN: {}".format(tp, tn, fp, fn))
     return tp, tn, fp, fn
 
 
@@ -75,15 +94,23 @@ def conf_matrix(tp, tn, fp, fn):
 
 def recall(tp, fn):
     tpr = tp / (tp + fn)
+    print("Recall: {}".format(tpr))
     return tpr
 
 
 def precision(tp, fp):
     ppv = tp / (tp + fp)
+    print("Precision: {}".format(ppv))
     return ppv
 
 
-def f_score(beta, recall, precision):
+def accruacy(tp, tn, fp, fn):
+    ppv = (tp + tn) / (tp + tn + fp + fn)
+    print("Accruacy: {}".format(ppv))
+    return ppv
+
+
+def f_score(recall, precision, beta=2):
     """
     Two commonly used values for β are 2, which weighs recall higher than precision, and 0.5, which weighs recall lower than precision.
     :param beta:
@@ -92,6 +119,7 @@ def f_score(beta, recall, precision):
     :return:
     """
     f_s = (1 + beta**2) * ((precision * recall) / ((beta**2 * precision) + recall))
+    print("F_{} score: {}".format(beta, f_s))
     return f_s
     
     

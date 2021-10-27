@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from helpers import de_standardize, standardize
+from helpers_perso import de_standardize, standardize
 
 
 def visualization(y, x, mean_x, std_x):
