@@ -2,6 +2,7 @@
 """ML Methods functions."""
 
 import numpy as np
+from tqdm import tqdm
 
 def mse(e):
     """Calculate mse for the given vector e.
@@ -57,12 +58,13 @@ def compute_loss_mae(y, tx, w):
     
     
     
-def compute_GD(y, tx, gamma):
+def compute_GD(y, tx, w):
     """Compute the gradient descent
     
     Args:
         y: expected values
         tx: inputs
+        w: weights
         gamma: step-size > 0
         
     Returns:
@@ -72,14 +74,14 @@ def compute_GD(y, tx, gamma):
     grad = - tx.T.dot(err) / len(err)
     return grad
     
-def least_squares_GD(y, tx, initial_w, max_iters, gamma):
+def least_squares_GD(y, tx, initial_w, max_iter, gamma):
     """Linear regression using gradient descent
     
     Args:
         y: 
         tx: 
         initial_w:
-        max_iters:
+        max_iter:
         gamma:
         
     Returns:
@@ -87,15 +89,15 @@ def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     
     """
     w = initial_w
-    for n in range(max_iters):
+    for n in tqdm(range(max_iter)):
         grad = compute_GD(y, tx, w)
         w = w - gamma * grad
-    loss = calculate_loss_mse(y, tx, w)
+    loss = compute_loss_mse(y, tx, w)
     return loss, w
     
     
 
-def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
+def least_squares_SGD(y, tx, initial_w, max_iter, gamma):
     """Linear regression using stochastic gradient descent
     
     
@@ -104,7 +106,7 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
         y: 
         tx: 
         initial_w:
-        max_iters:
+        max_iter:
         gamma:
         
     Returns:
@@ -114,7 +116,7 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     w = initial_w
     data_size = len(y)
     
-    for n in range(max_iters):
+    for n in range(max_iter):
         # as batch_size and num_batch are both 1, a batch creator (given from the labs) will only given
         # back one sample (the FIRST sample), given the batch creator shuffles the dataset before it 
         # gives back the one sample, this is equal to just pick a random sample
@@ -123,7 +125,7 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
         i = np.random.randint(low=0, high=data_size, size=1)
         grad = compute_GD(y[i], tx[i], w)
         w = w - gamma * grad
-    loss = calculate_loss_mse(y, tx, w)
+    loss = compute_loss_mse(y, tx, w)
     return loss, w
     
     
@@ -147,7 +149,7 @@ def least_squares(y, tx):
 
 
 def ridge_regression(y, tx, lambda_):
-     """Ridge regression using normal equations.
+    """Ridge regression using normal equations.
 
     Args:
         y: expected results
@@ -185,14 +187,14 @@ def calculate_loss(y, tx, w):
     return np.squeeze(- loss)
     
   
-def logistic_regression(y, tx, initial_w, max_iters, gamma):
-     """Logistic regression using gradient descent or SGD
+def logistic_regression(y, tx, initial_w, max_iter, gamma):
+    """Logistic regression using gradient descent or SGD
     
     Args:
         y: expected results
         tx: inputs
         initial_w: initial weight vector
-        max_iters: number of steps to run
+        max_iter: number of steps to run
         gamma: step-size
         
     Returns:
@@ -215,14 +217,14 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     
     
     
-def reg_logistic_regression(y, tx, initial_w, max_iters, gamma):
+def reg_logistic_regression(y, tx, initial_w, max_iter, gamma):
     """Regularized Logistic regression using gradient descent or SGD
     
     Args:
         y: expected results
         tx: inputs
         initial_w: initial weight vector
-        max_iters: number of steps to run
+        max_iter: number of steps to run
         gamma: step-size
         
     Returns:
@@ -253,14 +255,14 @@ def calculate_hessian(y, tx, w):
     return tx.T.dot(r).dot(tx)
 
 
-def learning_by_newton_method(y, tx, initial_w, max_iters, gamma):
+def learning_by_newton_method(y, tx, initial_w, max_iter, gamma):
     """Newton's method
     
     Args:
         y: expected results
         tx: inputs
         initial_w: initial weight vector
-        max_iters: number of steps to run
+        max_iter: number of steps to run
         gamma: step-size
         
     Returns:
