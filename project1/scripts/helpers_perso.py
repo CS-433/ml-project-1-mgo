@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """some personal helper functions for project 1."""
 import numpy as np
+from tqdm import tqdm
 
 def standardize(x):
     """Standardize the original data set."""
@@ -66,6 +67,40 @@ def cross_validation(y, x, k_indices, k, method_train, method_loss, *args):
     test_loss = method_loss(y_test, x_train, w)
     
     return w, train_loss, test_loss
+
+
+def trainer_val(y_val, tX_val, val_iter, method_train, method_loss, *args):
+    """
+    
+    """
+    iter_count, best_val, best_weight = 0, np.inf, 0
+    train_losses, val_losses, weights = [], [], []
+    y, tx, w, max_iters, gamma = args
+    runs = max_iters // val_iter
+    if runs < (max_iters / val_iter):
+        # run validation after the last training run
+        runs += 1
+    for run in range(runs):
+        max_iters -= val_iter
+        if max_iters >= 0:
+            # run training till validation
+            loss, w = method_train(y, tx, w, val_iter, gamma)
+            iter_count += val_iter
+        else: 
+            # run the rest iterations
+            max_iters += val_iter
+            loss, w = method_train(y, tx, w, max_iters, gamma)
+            iter_count += max_iters
+        # validate
+        val_loss = method_loss(y_val, tX_val, w)
+        train_losses.append(loss)
+        val_losses.append(val_loss)
+        weights.append(w)
+        if best_val > val_loss:
+            best_val = val_loss
+            best_weight = w
+        print("In run: {}, trained. Train loss: {}, Val loss: {}.".format(run, loss, val_loss))
+    return loss, best_weight
 
 
 def confusion_mat(tp, tn, fp, fn):

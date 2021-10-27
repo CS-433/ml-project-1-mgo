@@ -82,6 +82,6 @@ def vis_conf_mtx(conf_mtx):
             text = ax.text(j, i, conf_mtx[i, j],
                            ha="center", va="center", color="w")
 
-    ax.set_title("Harvest of local farmers (in tons/year)")
+    ax.set_title("Predictions")
     fig.tight_layout()
     plt.show()
