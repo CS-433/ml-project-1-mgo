@@ -187,7 +187,7 @@ def calculate_loss(y, tx, w):
     return np.squeeze(- loss)
 
 
-def logistic_regression(y, tx, initial_w, max_iterss, gamma):
+def logistic_regression(y, tx, initial_w, max_iter, gamma):
     """Logistic regression using gradient descent or SGD    
     Args:
         y: expected results
@@ -200,17 +200,15 @@ def logistic_regression(y, tx, initial_w, max_iterss, gamma):
        
     
     """
-    losses = []
     w = initial_w
-    for iter in range(max_iters):
+    for iter in range(max_iter):
         """
         Do one step of gradient descent using logistic regression.
         Return the loss and the updated w.
         """
-        loss = calculate_loss(y, tx, w)
-        losses.append(loss)
         grad = calculate_gradient(y, tx, w)
         w -= gamma * grad
+    loss = calculate_loss(y, tx, w)
     return loss, w
     
     
