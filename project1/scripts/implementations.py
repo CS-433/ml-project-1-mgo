@@ -170,7 +170,7 @@ def ridge_regression(y, tx, lambda_):
 
 def sigmoid(t):
     """apply sigmoid function on t."""
-    return 1.0 / (1 + np.exp(-t))
+    return 1 / (1 + np.exp(-t))
 
 
 def calculate_gradient(y, tx, w):
@@ -187,7 +187,7 @@ def calculate_loss(y, tx, w):
     return np.squeeze(- loss)
 
 
-def logistic_regression(y, tx, initial_w, max_iter, gamma):
+def logistic_regression(y, tx, initial_w, max_iters, gamma):
     """Logistic regression using gradient descent or SGD    
     Args:
         y: expected results
@@ -201,7 +201,7 @@ def logistic_regression(y, tx, initial_w, max_iter, gamma):
     
     """
     w = initial_w
-    for iter in range(max_iter):
+    for iter in range(max_iters):
         """
         Do one step of gradient descent using logistic regression.
         Return the loss and the updated w.
@@ -214,7 +214,7 @@ def logistic_regression(y, tx, initial_w, max_iter, gamma):
     
     
     
-def reg logistic regression(y, tx, lambda_ , initial w, max_iters, gamma):
+def reg_logistic_regression(y, tx, lambda_ , initial_w, max_iters, gamma):
     """Regularized Logistic regression using gradient descent or SGD
     
     Args:
@@ -245,9 +245,8 @@ def reg logistic regression(y, tx, lambda_ , initial w, max_iters, gamma):
 def calculate_hessian(y, tx, w):
     """return the Hessian of the loss function."""
     pred = sigmoid(tx.dot(w))
-    pred = np.diag(pred.T[0])
-    r = np.multiply(pred, (1-pred))
-    return tx.T.dot(r).dot(tx)
+    S = pred * (1 - pred)
+    return (S * (tx.T))@tx
 
 
 def learning_by_newton_method(y, tx, initial_w, max_iters, gamma):
