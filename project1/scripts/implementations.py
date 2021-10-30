@@ -54,10 +54,6 @@ def compute_loss_mae(y, tx, w):
     e = y - tx.dot(w)
     return mae(e)    
     
-
-    
-    
-    
 def compute_GD(y, tx, w):
     """Compute the gradient descent
     
@@ -145,7 +141,7 @@ def least_squares(y, tx):
     b = tx.T.dot(y)
     w = np.linalg.solve(a, b)
     mse = compute_loss_mse(y, tx, w)
-    return w, mse
+    return mse, w
 
 
 def ridge_regression(y, tx, lambda_):
@@ -165,7 +161,7 @@ def ridge_regression(y, tx, lambda_):
     b = tx.T.dot(y)
     w = np.linalg.solve(a, b)
     mse = compute_loss_mse(y, tx, w)
-    return w, mse
+    return mse, w
 
 
 def sigmoid(t):
@@ -176,15 +172,14 @@ def sigmoid(t):
 def calculate_gradient(y, tx, w):
     """compute the gradient of loss."""
     pred = sigmoid(tx.dot(w))
-    grad = tx.T.dot(pred - y)
+    grad = (tx.T).dot(pred - y)
     return grad
 
 
 def calculate_loss(y, tx, w):
     """compute the cost by negative log likelihood."""
     pred = sigmoid(tx.dot(w))
-    loss = y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred))
-    return np.squeeze(- loss)
+    return - (y.T).dot(np.log(pred)) - (1 - y).T.dot(np.log(1 - pred))
 
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
@@ -231,14 +226,13 @@ def reg_logistic_regression(y, tx, lambda_ , initial_w, max_iters, gamma):
     w = initial_w
     for iter in range(max_iters):
         """return the loss and gradient."""
-        num_samples = y.shape[0]
         gradient = calculate_gradient(y, tx, w) + 2 * lambda_ * w
         """
         Do one step of gradient descent, using the penalized logistic regression.
         Return the loss and updated w.
         """
         w -= gamma * gradient
-    loss = calculate_loss(y, tx, w) + lambda_ * np.squeeze(w.T.dot(w))
+    loss = calculate_loss(y, tx, w) + lambda_ * np.linalg.norm(w)**2
     return loss, w
     
 
