@@ -3,9 +3,9 @@
 import numpy as np
 from tqdm import tqdm
 from implementations import *
-from helpers_perso import *
 from proj1_helpers import *
-from plots import *
+import matplotlib.pyplot as plt
+
 
 def standardize(x, mean_x=None, std_x=None):
     """Standardize the original data set."""
@@ -83,6 +83,34 @@ def buildpoly(x, degree):
         poly = np.c_[poly, np.power(x, deg)]
     return poly
 
+
+
+def vis_conf_mtx(conf_mtx):
+    """
+    Visualize the confusion matrix
+    :param conf_mtx:
+    :return:
+    """
+
+    fig, ax = plt.subplots()
+    im = ax.imshow(conf_mtx)
+    s = conf_mtx.shape[0]
+    # We want to show all ticks...
+    ax.set_xticks(np.arange(s))
+    ax.set_yticks(np.arange(s))
+    # ... and label them with the respective list entries
+    ax.set_xticklabels([1, 0])
+    ax.set_yticklabels([1, 0])
+
+    # Loop over data dimensions and create text annotations.
+    for i in range(s):
+        for j in range(s):
+            text = ax.text(j, i, conf_mtx[i, j],
+                           ha="center", va="center", color="w")
+
+    ax.set_title("Predictions")
+    fig.tight_layout()
+    plt.show()
 
 def grid_search(y_val, tX_val, val_iter, method_train, method_loss, y, tX, max_iters, *args):
     """
@@ -228,6 +256,6 @@ def f_score(recall, precision, beta=2):
     
     
     
-    
+ 
 
     
