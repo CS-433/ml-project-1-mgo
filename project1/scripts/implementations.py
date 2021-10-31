@@ -172,14 +172,21 @@ def sigmoid(t):
 def calculate_gradient(y, tx, w):
     """compute the gradient of loss."""
     pred = sigmoid(tx.dot(w))
+    #print("pred", pred)
     grad = (tx.T).dot(pred - y)
+    #print("grad", grad)
     return grad
 
 
 def calculate_loss(y, tx, w):
     """compute the cost by negative log likelihood."""
     pred = sigmoid(tx.dot(w))
-    return - (y.T).dot(np.log(pred)) - (1 - y).T.dot(np.log(1 - pred))
+    pred[pred == 1] -= np.finfo(float).eps
+    pred[pred == 0] += np.finfo(float).eps
+    #print("pred2", pred)
+    loss = - (y.T).dot(np.log(pred)) - (1 - y).T.dot(np.log(1 - pred))
+    #print("loss", loss)
+    return loss
 
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
@@ -196,7 +203,7 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     
     """
     w = initial_w
-    for iter in range(max_iters):
+    for iter in tqdm(range(max_iters), desc="In step"):
         """
         Do one step of gradient descent using logistic regression.
         Return the loss and the updated w.
@@ -224,7 +231,7 @@ def reg_logistic_regression(y, tx, lambda_ , initial_w, max_iters, gamma):
     
     """
     w = initial_w
-    for iter in range(max_iters):
+    for iter in tqdm(range(max_iters), desc="In step"):
         """return the loss and gradient."""
         gradient = calculate_gradient(y, tx, w) + 2 * lambda_ * w
         """
@@ -258,7 +265,7 @@ def learning_by_newton_method(y, tx, initial_w, max_iters, gamma):
     
     """
     w = initial_w
-    for iter in range(max_iters):
+    for iter in tqdm(range(max_iters)):
         """
         Do one step of Newton's method.
         Return the loss and updated w.
