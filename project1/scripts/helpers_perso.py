@@ -160,6 +160,7 @@ def trainer_val(y_val, tX_val, method_train, method_loss, y, tx, val_iter = 1, m
                 # least squares GD
                 # least squares SGD
                 # logistic regression
+                # learning_by_newton_method
                 loss, w = method_train(y, tx, w, val_iter, gamma)
             else:
                 # reg logistic regression
@@ -178,6 +179,7 @@ def trainer_val(y_val, tX_val, method_train, method_loss, y, tx, val_iter = 1, m
                 # least squares GD
                 # least squares SGD
                 # logistic regression
+                # learning_by_newton_method
                 loss, w = method_train(y, tx, w, val_iter, gamma)
             else:
                 # reg logistic regression
