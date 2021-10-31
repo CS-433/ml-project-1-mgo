@@ -27,6 +27,10 @@ log_norm_idx = [0,1,2,3,4,5,7,8,9,10,13,16,19,21,23,26,29]
 lambda_ = 0.001
 degree = 9
 
+# drop features
+drop_0 = [4, 5, 6, 8, 9, 23, 24, 25, 26, 27, 28]
+drop_1 = [4, 5, 6, 26, 27, 28]
+
 def load_data(data_path='../data/'):
     DATA_TRAIN_PATH = data_path + 'train.csv'
     DATA_TEST_PATH = data_path + 'test.csv'
@@ -53,6 +57,9 @@ def split_by_feature(tX, y=None, feature22=None):
     tX_0 = tX[feature22 == 0]
     tX_1 = tX[feature22 == 1]
     tX_2 = tX[feature22 > 1]
+    # Drop the undefined features
+    tX_0 = np.delete(tX_0, drop_0, axis=1)
+    tX_1 = np.delete(tX_1, drop_1, axis=1)
     print("Shape 0: {}, Shape 1: {}, Shape 2: {}".format(tX_0.shape, tX_1.shape, tX_2.shape))
     if y is not None:
         y_0 = y[feature22 == 0]
