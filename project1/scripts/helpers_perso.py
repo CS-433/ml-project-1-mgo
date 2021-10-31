@@ -2,13 +2,21 @@
 """some personal helper functions for project 1."""
 import numpy as np
 from tqdm import tqdm
+from implementations import *
+from helpers_perso import *
+from proj1_helpers import *
+from plots import *
 
-def standardize(x):
+def standardize(x, mean_x=None, std_x=None):
     """Standardize the original data set."""
-    mean_x = np.mean(x)
-    x = x - mean_x
-    std_x = np.std(x)
-    x = x / std_x
+    if mean_x is None or std_x is None:
+        mean_x = np.nanmean(x, axis=0)
+        x = x - mean_x
+        std_x = np.nanstd(x, axis=0)
+        x = x / std_x
+    else:
+        x = x - mean_x
+        x = x / std_x
     return x, mean_x, std_x
 
 
@@ -69,13 +77,40 @@ def cross_validation(y, x, k_indices, k, method_train, method_loss, *args):
     return w, train_loss, test_loss
 
 
-def trainer_val(y_val, tX_val, val_iter, method_train, method_loss, *args):
+def buildpoly(x, degree):
+    poly = np.ones((len(x), 1))
+    for deg in range(1, degree+1):
+        poly = np.c_[poly, np.power(x, deg)]
+    return poly
+
+
+def grid_search(y_val, tX_val, val_iter, method_train, method_loss, y, tX, max_iters, *args):
+    """
+    Degree
+    Gamma
+    Lambda
+    """
+    degrees, gammas, lambdas_= args
+    
+    for degree in degrees:
+        for gamma in gammas:
+            for lambda_ in lambdas_:
+                print("In: Degree {}, Gamma {}, Lambda {}".format(degree, gamma, lambda_))
+                tX_val = buildpoly(tX_val, degree)
+                tX = buildpoly(tX, degree)
+                _, _ = trainer_val(y_val, tX_val, method_train, method_loss, y, tX, val_iter, max_iters, gamma, lambda_)
+                print("-"*100)
+                
+    
+
+
+def trainer_val(y_val, tX_val, method_train, method_loss, y, tx, val_iter = 1, max_iters = 1, gamma = 0.0000001, lambda_ = None):
     """
     
     """
     iter_count, best_val, best_weight = 0, np.inf, 0
     train_losses, val_losses, weights = [], [], []
-    y, tx, w, max_iters, gamma = args
+    w=np.zeros(tx.shape[1])
     runs = max_iters // val_iter
     if runs < (max_iters / val_iter):
         # run validation after the last training run
@@ -84,12 +119,38 @@ def trainer_val(y_val, tX_val, val_iter, method_train, method_loss, *args):
         max_iters -= val_iter
         if max_iters >= 0:
             # run training till validation
-            loss, w = method_train(y, tx, w, val_iter, gamma)
+            if gamma is None and lambda_ is None:
+                # least squares
+                loss, w = method_train(y, tx)
+            elif gamma is None:
+                # ridge regression
+                loss, w = method_train(y, tx, lambda_)
+            elif lambda_ is None:
+                # least squares GD
+                # least squares SGD
+                # logistic regression
+                loss, w = method_train(y, tx, w, val_iter, gamma)
+            else:
+                # reg logistic regression
+                loss, w = method_train(y, tx, lambda_ , w, val_iter, gamma)
             iter_count += val_iter
         else: 
             # run the rest iterations
             max_iters += val_iter
-            loss, w = method_train(y, tx, w, max_iters, gamma)
+            if gamma is None and lambda_ is None:
+                # least squares
+                loss, w = method_train(y, tx)
+            elif gamma is None:
+                # ridge regression
+                loss, w = method_train(y, tx, lambda_)
+            elif lambda_ is None:
+                # least squares GD
+                # least squares SGD
+                # logistic regression
+                loss, w = method_train(y, tx, w, val_iter, gamma)
+            else:
+                # reg logistic regression
+                loss, w = method_train(y, tx, lambda_ , w, val_iter, gamma)
             iter_count += max_iters
         # validate
         val_loss = method_loss(y_val, tX_val, w)
@@ -100,6 +161,14 @@ def trainer_val(y_val, tX_val, val_iter, method_train, method_loss, *args):
             best_val = val_loss
             best_weight = w
         print("In run: {}, trained. Train loss: {}, Val loss: {}.".format(run, loss, val_loss))
+    # Estimating the predictions on the validation set
+    pred_val = predict_labels(best_weight, tX_val)
+    # Confusion matrix
+    tp, tn, fp, fn = calc_rates(y_val, pred_val)
+    vis_conf_mtx(conf_matrix(tp, tn, fp, fn))
+    # Recall, Precision, F2-Score, Accruacy
+    f_score(recall(tp, fn), precision(tp, fp))
+    accruacy(tp, tn, fp, fn)
     return loss, best_weight
 
 
