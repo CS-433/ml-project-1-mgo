@@ -112,7 +112,7 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     w = initial_w
     data_size = len(y)
     
-    for n in range(max_iters):
+    for n in tqdm(range(max_iters)):
         # as batch_size and num_batch are both 1, a batch creator (given from the labs) will only given
         # back one sample (the FIRST sample), given the batch creator shuffles the dataset before it 
         # gives back the one sample, this is equal to just pick a random sample

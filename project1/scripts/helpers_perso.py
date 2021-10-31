@@ -112,7 +112,7 @@ def vis_conf_mtx(conf_mtx):
     fig.tight_layout()
     plt.show()
 
-def grid_search(y_val, tX_val, val_iter, method_train, method_loss, y, tX, max_iters, *args):
+def grid_search(y_val, tX_val, val_iter, method_train, method_loss, y_train, tX_train, max_iters, *args):
     """
     Degree
     Gamma
@@ -124,9 +124,12 @@ def grid_search(y_val, tX_val, val_iter, method_train, method_loss, y, tX, max_i
         for gamma in gammas:
             for lambda_ in lambdas_:
                 print("In: Degree {}, Gamma {}, Lambda {}".format(degree, gamma, lambda_))
-                tX_val = buildpoly(tX_val, degree)
-                tX = buildpoly(tX, degree)
-                _, _ = trainer_val(y_val, tX_val, method_train, method_loss, y, tX, val_iter, max_iters, gamma, lambda_)
+                if degree != 1:
+                    tX_val_p = buildpoly(tX_val, degree)
+                    tX_train_p = buildpoly(tX_train, degree)
+                else:
+                    tX_val_p, tX_train_p = tX_val, tX_train
+                _, _ = trainer_val(y_val, tX_val_p, method_train, method_loss, y_train, tX_train_p, val_iter, max_iters, gamma, lambda_)
                 print("-"*100)
                 
     
@@ -188,7 +191,9 @@ def trainer_val(y_val, tX_val, method_train, method_loss, y, tx, val_iter = 1, m
         if best_val > val_loss:
             best_val = val_loss
             best_weight = w
+            best_iter = iter_count
         print("In run: {}, trained. Train loss: {}, Val loss: {}.".format(run, loss, val_loss))
+    print("Best weights from iteration {}".format(best_iter))
     # Estimating the predictions on the validation set
     pred_val = predict_labels(best_weight, tX_val)
     # Confusion matrix
