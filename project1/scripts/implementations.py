@@ -14,7 +14,10 @@ def mse(e):
         mse value for the given vector.
     """
     return 1/2*np.mean(e**2)
-    
+
+def rmse(e):
+    return np.sqrt(mse(e))
+
 def mae(e):
     """Calculate mae for the given vector e.
 
@@ -39,6 +42,20 @@ def compute_loss_mse(y, tx, w):
     """
     e = y - tx.dot(w)
     return mse(e)
+
+def compute_loss_rmse(y, tx, w):
+    """Compute the loss function using rmse.
+
+    Args:
+        y: expected results
+        tx : inputs
+        w : weights
+
+    Returns:
+        mse value for the model.
+    """
+    e = y - tx.dot(w)
+    return rmse(e)
     
 def compute_loss_mae(y, tx, w):
     """Compute the loss function using mae.
@@ -61,8 +78,7 @@ def compute_GD(y, tx, w):
         y: expected values
         tx: inputs
         w: weights
-        gamma: step-size > 0
-        
+                
     Returns:
        gradient
     """
@@ -74,15 +90,16 @@ def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     """Linear regression using gradient descent
     
     Args:
-        y: 
-        tx: 
-        initial_w:
-        max_iters:
-        gamma:
+        y: expected results
+        tx: inputs
+        initial_w: initial weight vector
+        max_iters: number of steps to run
+        gamma: step-size
         
     Returns:
-       
-    
+       loss: last loss
+       w: last weights
+           
     """
     w = initial_w
     for n in tqdm(range(max_iters), desc="In step"):
@@ -95,18 +112,17 @@ def least_squares_GD(y, tx, initial_w, max_iters, gamma):
 
 def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     """Linear regression using stochastic gradient descent
-    
-    
-    
+   
     Args:
-        y: 
-        tx: 
-        initial_w:
-        max_iters:
-        gamma:
+        y: expected results
+        tx: inputs
+        initial_w: initial weight vector
+        max_iters: number of steps to run
+        gamma: step-size
         
     Returns:
-       
+       loss: last loss
+       w: last weights
     
     """
     w = initial_w
@@ -131,9 +147,8 @@ def least_squares(y, tx):
     """Compute the least squares solution.
 
     Args:
-        y: 
-        tx: 
-
+        y: expected results
+        tx: inputs
     Returns:
         optimal weights and loss with normal equation.
     """
@@ -199,8 +214,8 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         gamma: step-size
         
     Returns:
-       
-    
+       loss: last loss
+       w: last weights     
     """
     w = initial_w
     for iter in tqdm(range(max_iters), desc="In step"):
@@ -227,8 +242,8 @@ def reg_logistic_regression(y, tx, lambda_ , initial_w, max_iters, gamma):
         gamma: step-size
         
     Returns:
-       
-    
+       loss: last loss
+       w: last weights     
     """
     w = initial_w
     for iter in tqdm(range(max_iters), desc="In step"):
@@ -261,8 +276,8 @@ def learning_by_newton_method(y, tx, initial_w, max_iters, gamma):
         gamma: step-size
         
     Returns:
-       
-    
+       loss: last loss
+       w: last weights     
     """
     w = initial_w
     for iter in tqdm(range(max_iters)):
@@ -276,4 +291,95 @@ def learning_by_newton_method(y, tx, initial_w, max_iters, gamma):
     loss = calculate_loss(y, tx, w)
     return loss, w
     
+################################################################################
+# Fixing the numpy overflow for logistic methods
+# Following and using code from http://fa.bianp.net/blog/2019/evaluate_logistic/
+# Theoretical background follows Mächler, Martin (2012) “Accurately Computing log(1- exp(-|a|)) Assessed by the Rmpfr package”. The Comprehensive R Archive Network.
+
+def stable_calculate_gradient(y, tx, w):
+    a = tx.dot(w)
+    # Taken from webiste!!!
+    """Compute sigmoid(x) - b component-wise."""
+    idx = a < 0
+    sig = np.zeros_like(a)
+    exp_a = np.exp(a[idx])
+    y_idx = y[idx]
+    sig[idx] = ((1 - y_idx) * exp_a - y_idx) / (1 + exp_a)
+    exp_nx = np.exp(-a[~idx])
+    y_nidx = y[~idx]
+    sig[~idx] = ((1 - y_nidx) - y_nidx * exp_nx) / (1 + exp_nx)
+    grad = tx.T.dot(sig) / tx.shape[0]
+    return grad
+
+def logsig(x):
+    # Taken from webiste!!!
+    """Compute the log-sigmoid function component-wise."""
+    ls = np.zeros_like(x)
+    idx0 = x < -33
+    ls[idx0] = x[idx0]
+    idx1 = (x >= -33) & (x < -18)
+    ls[idx1] = x[idx1] - np.exp(x[idx1])
+    idx2 = (x >= -18) & (x < 37)
+    ls[idx2] = -np.log1p(np.exp(-x[idx2]))
+    idx3 = x >= 37
+    ls[idx3] = -np.exp(-x[idx3])
+    return ls
+
+def stable_calculate_loss(y, tx, w):
+    # Taken from webiste!!!
+    """Logistic loss, numerically stable implementation."""
+    a = np.dot(tx, w)
+    y = np.asarray(y)
+    return np.mean((1 - y) * a - logsig(a))    
     
+def stable_reg_logistic_regression(y, tx, lambda_ , initial_w, max_iters, gamma):
+    """Stable Regularized Logistic regression using gradient descent or SGD
+    
+    Args:
+        y: expected results
+        tx: inputs
+        initial_w: initial weight vector
+        max_iters: number of steps to run
+        gamma: step-size
+        
+    Returns:
+       loss: last loss
+       w: last weights     
+    """
+    w = initial_w
+    for iter in tqdm(range(max_iters), desc="In step"):
+        """return the loss and gradient."""
+        gradient = stable_calculate_gradient(y, tx, w) + 2 * lambda_ * w
+        """
+        Do one step of gradient descent, using the penalized logistic regression.
+        Return the loss and updated w.
+        """
+        w -= gamma * gradient
+    loss = stable_calculate_loss(y, tx, w) + lambda_ * np.linalg.norm(w)**2
+    return loss, w
+
+def stable_logistic_regression(y, tx, initial_w, max_iters, gamma):
+    """Stable logistic regression using gradient descent or SGD    
+    Args:
+        y: expected results
+        tx: inputs
+        initial_w: initial weight vector
+        max_iters: number of steps to run
+        gamma: step-size
+        
+    Returns:
+       loss: last loss
+       w: last weights    
+    """
+    w = initial_w
+    for iter in tqdm(range(max_iters), desc="In step"):
+        """
+        Do one step of gradient descent using logistic regression.
+        Return the loss and the updated w.
+        """
+        grad = stable_calculate_gradient(y, tx, w)
+        w -= gamma * grad
+    loss = stable_calculate_loss(y, tx, w)
+    return loss, w
+    
+

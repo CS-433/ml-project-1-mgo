@@ -62,8 +62,6 @@ def visualization(y, x, mean_x, std_x):
 def vis_conf_mtx(conf_mtx):
     """
     Visualize the confusion matrix
-    :param conf_mtx:
-    :return:
     """
 
     fig, ax = plt.subplots()

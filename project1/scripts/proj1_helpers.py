@@ -3,6 +3,7 @@
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
+from implementations import sigmoid
 
 
 def load_csv_data(data_path, sub_sample=False):
@@ -25,9 +26,11 @@ def load_csv_data(data_path, sub_sample=False):
     return yb, input_data, ids
 
 
-def predict_labels(weights, data):
+def predict_labels(weights, data, use_sig=False):
     """Generates class predictions given weights, and a test data matrix"""
     y_pred = np.dot(data, weights)
+    if use_sig == True:
+        y_pred = sigmoid(y_pred)
     y_pred[np.where(y_pred <= 0.5)] = 0
     y_pred[np.where(y_pred > 0.5)] = 1
     

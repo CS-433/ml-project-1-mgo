@@ -8,7 +8,10 @@ import matplotlib.pyplot as plt
 
 
 def standardize(x, mean_x=None, std_x=None):
-    """Standardize the original data set."""
+    """
+    Standardize data set.
+    With substracting the mean and dividing throught the standard deviation
+    """
     if mean_x is None or std_x is None:
         mean_x = np.nanmean(x, axis=0)
         x = x - mean_x
@@ -21,14 +24,18 @@ def standardize(x, mean_x=None, std_x=None):
 
 
 def de_standardize(x, mean_x, std_x):
-    """Reverse the procedure of standardization."""
+    """
+    Reverse the procedure of standardization
+    """
     x = x * std_x
     x = x + mean_x
     return x
 
 
 def split_data(x, y, ratio, seed=1):
-    """split the dataset based on the split ratio. Into train and validation"""
+    """
+    split the dataset based on the split ratio. Into train and validation set
+    """
     # same seed
     np.random.seed(seed)
     # generate random indices
@@ -46,7 +53,9 @@ def split_data(x, y, ratio, seed=1):
 
 
 def build_k_indices(y, k_fold, seed):
-    """build k indices for k-fold."""
+    """
+    build k indices for k-fold.
+    """
     num_row = y.shape[0]
     interval = int(num_row / k_fold)
     np.random.seed(seed)
@@ -78,6 +87,9 @@ def cross_validation(y, x, k_indices, k, method_train, method_loss, *args):
 
 
 def buildpoly(x, degree):
+    """
+    Expands x polynomnial by a given degree
+    """
     poly = np.ones((len(x), 1))
     for deg in range(1, degree+1):
         poly = np.c_[poly, np.power(x, deg)]
@@ -88,8 +100,7 @@ def buildpoly(x, degree):
 def vis_conf_mtx(conf_mtx):
     """
     Visualize the confusion matrix
-    :param conf_mtx:
-    :return:
+    conf_mtx: must be a 2x2 np.array - np.array([[tp, fn], [fp, tn]])
     """
 
     fig, ax = plt.subplots()
@@ -114,9 +125,15 @@ def vis_conf_mtx(conf_mtx):
 
 def grid_search(y_val, tX_val, val_iter, method_train, method_loss, y_train, tX_train, max_iters, *args):
     """
-    Degree
-    Gamma
-    Lambda
+    Runs a grid search with given parameters on the training mehtod with loss.
+    Uses the function trainer_val to train.
+    Grid search runs over these parameters:
+        Degree
+        Gamma
+        Lambda
+    These must be a list.
+    For models / training methods without Lamdba or Gamma give a list with None in it ([None]) for each argument.
+    For models which do not have training steps val_iter and max_iters must be 1.
     """
     degrees, gammas, lambdas_= args
     
@@ -137,7 +154,11 @@ def grid_search(y_val, tX_val, val_iter, method_train, method_loss, y_train, tX_
 
 def trainer_val(y_val, tX_val, method_train, method_loss, y, tx, val_iter = 1, max_iters = 1, gamma = 0.0000001, lambda_ = None):
     """
-    
+    Takes validation and training data runs the given training and loss method on it with given parameters (gamma, lambda).
+    After val_iter training steps it runs a once the loss on the validation set. 
+    This allows you to see at which iteration step the best model with the best loss was trained.
+    For models which do not have training steps val_iter and max_iters must be 1.
+    Runs validation with confusion matrix in the end.
     """
     iter_count, best_val, best_weight = 0, np.inf, 0
     train_losses, val_losses, weights = [], [], []
@@ -218,6 +239,10 @@ def confusion_mat(tp, tn, fp, fn):
     
 
 def calc_rates(y, p):
+    """
+    Calculates the true positive, true negative, false postive and false negative
+    on the given predictions p and true labels y and returns them
+    """
     tn = sum((p == 0) & (p == y))  # prediction 0 and the same as the label -> true negative
     tp = sum((p == 1) & (p == y))  # prediction 1 and the same as the label -> true positive
     fn = sum((p == 0) & (p != y))  # prediction 0 and not the same as the label -> false negative
@@ -227,23 +252,35 @@ def calc_rates(y, p):
 
 
 def conf_matrix(tp, tn, fp, fn):
+    """
+    Returns an array (confusion matrix) from true positive, true negative, false postive and false negative
+    """
     conf_mtx = np.array([[tp, fn], [fp, tn]])
     return conf_mtx
 
 
 def recall(tp, fn):
+    """
+    Calculates the recall with true postive and false negative
+    """
     tpr = tp / (tp + fn)
     print("Recall: {}".format(tpr))
     return tpr
 
 
 def precision(tp, fp):
+    """
+    Calculates the precision with true postive and false positive
+    """
     ppv = tp / (tp + fp)
     print("Precision: {}".format(ppv))
     return ppv
 
 
 def accruacy(tp, tn, fp, fn):
+    """
+    Calculates the accruacy with true positive, true negative, false postive and false negative
+    """
     ppv = (tp + tn) / (tp + tn + fp + fn)
     print("Accruacy: {}".format(ppv))
     return ppv
@@ -251,11 +288,8 @@ def accruacy(tp, tn, fp, fn):
 
 def f_score(recall, precision, beta=2):
     """
+    Calculates the f score given recall and precision
     Two commonly used values for β are 2, which weighs recall higher than precision, and 0.5, which weighs recall lower than precision.
-    :param beta:
-    :param recall:
-    :param precision:
-    :return:
     """
     f_s = (1 + beta**2) * ((precision * recall) / ((beta**2 * precision) + recall))
     print("F_{} score: {}".format(beta, f_s))
