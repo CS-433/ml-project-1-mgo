@@ -24,14 +24,18 @@ from zipfile import ZipFile
 
 # skewed features
 log_norm_idx = [0,1,2,3,4,5,7,8,9,10,13,16,19,21,23,26,29]
+# found best parameters with cross validation
 lambda_ = 0.001
 degree = 9
 
-# drop features
+# drop features, from data description
 drop_0 = [4, 5, 6, 8, 9, 23, 24, 25, 26, 27, 28]
 drop_1 = [4, 5, 6, 26, 27, 28]
 
 def load_data(data_path='../data/'):
+    """
+    Load the datasets: train and test
+    """
     DATA_TRAIN_PATH = data_path + 'train.csv'
     DATA_TEST_PATH = data_path + 'test.csv'
     with ZipFile(DATA_TRAIN_PATH + '.zip', 'r') as zip:
@@ -47,12 +51,15 @@ def load_data(data_path='../data/'):
     
 def log_norm_skewed(tX, log_norm_idx):
     """
-    
+    log1p on skewed features
     """
     tX[:, log_norm_idx] = np.log1p(tX[:, log_norm_idx])
     return tX
 
 def split_by_feature(tX, y=None, feature22=None):
+    """
+    Split the data up by categorical feature 22
+    """
     # Split up the dataset by feature 22 by 0, 1 and >1
     tX_0 = tX[feature22 == 0]
     tX_1 = tX[feature22 == 1]
