@@ -3,7 +3,7 @@
 
 Given the CERN dataset this code will predict if a Higgs Boson particle occurs
 
-Members of this repository : Oliver Becker, Maxence Bertinger
+Members of this repository : Oliver Becker, Maxence Bertinger, Galann Pennec
 
 ## Requirements
 python 3.8  
