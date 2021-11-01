@@ -2,12 +2,12 @@
 This is the script to reproduce our best prediction results:
 Overview:
     1. Load datasets
-    2. Set NaN
-    3. Log normalize on Skewed data
+    2. Splitt up the data by feature 22
+    3. Set NaN
+    4. Log normalize on Skewed data
         Features which are skewed (see notebook): 0,1,2,3,4,5,7,8,9,10,13,16,19,21,23,26,29
-    4. Standardize data
-    5. Remove NaN
-    6. Splitt up the data by feature 22
+    5. Standardize data
+    6. Remove NaN
     7. Polynominal expansion
     8. Train three seperate models of Ridge Regression on the datasets
         Best parameters for Ridge Regression (found out with grid_search):
@@ -58,8 +58,8 @@ def split_by_feature(tX, y=None, feature22=None):
     tX_1 = tX[feature22 == 1]
     tX_2 = tX[feature22 > 1]
     # Drop the undefined features
-    tX_0 = np.delete(tX_0, drop_0, axis=1)
-    tX_1 = np.delete(tX_1, drop_1, axis=1)
+    #tX_0 = np.delete(tX_0, drop_0, axis=1)
+    #tX_1 = np.delete(tX_1, drop_1, axis=1)
     print("Shape 0: {}, Shape 1: {}, Shape 2: {}".format(tX_0.shape, tX_1.shape, tX_2.shape))
     if y is not None:
         y_0 = y[feature22 == 0]
@@ -78,37 +78,38 @@ if __name__ == "__main__":
     # 1.2 Remember feature 22 - on this data we will splitt
     feature22_tX = tX[:, 22]
     feature22_tX_test = tX_test[:, 22]
-    # 2. Set NaN
-    for t_set in [tX, tX_test]:
-        t_set[t_set == -999] = np.nan
-    # 3. Log normalize on Skewed data
-    tX = log_norm_skewed(tX, log_norm_idx)
-    tX_test = log_norm_skewed(tX_test, log_norm_idx)
-    # 4. Standardize data
-    tX, mean_X_train, std_X_train = standardize(tX)
-    tX_test, mean_X_test, std_X_test = standardize(tX_test, mean_X_train, std_X_train)
-    # 5. Remove NaN
-    for t_set in [tX, tX_test]:
-        t_set[np.ma.masked_invalid(t_set).mask] = 0
-    # 6. Splitt up the data by feature 22
+    
+    # 2. Splitt up the data by feature 22
     tX_0, tX_1, tX_2, y_0, y_1, y_2 = split_by_feature(tX, y, feature22_tX)
     tX_test_0, tX_test_1, tX_test_2 = split_by_feature(tX_test, None, feature22_tX_test)
-    # 7. Polynominal expansion
+    
     models_trained = []
     predictions = []
     for i, tr_set in enumerate([[tX_0, y_0, tX_test_0], [tX_1, y_1, tX_test_1], [tX_2, y_2, tX_test_2]]):
-        print("Training data set {}".format(i))
-        train_set, y_train_set, test_set = tr_set
-        
+        print("Data set {}".format(i))
+        tX, y_tX, tX_test = tr_set
+        # 3. Set NaN
+        for t_set in [tX, tX_test]:
+            t_set[t_set == -999] = np.nan
+        # 4. Log normalize on Skewed data
+        tX = log_norm_skewed(tX, log_norm_idx)
+        tX_test = log_norm_skewed(tX_test, log_norm_idx)
+        # 5. Standardize data
+        tX, mean_X_train, std_X_train = standardize(tX)
+        tX_test, mean_X_test, std_X_test = standardize(tX_test, mean_X_train, std_X_train)
+        # 6. Remove NaN
+        for t_set in [tX, tX_test]:
+            t_set[np.ma.masked_invalid(t_set).mask] = 0
+        # 7. Polynominal expansion       
         if degree != 1:
-            tX_train_p = buildpoly(train_set, degree)
-            tX_test_p = buildpoly(test_set, degree)
+            tX_train_p = buildpoly(tX, degree)
+            tX_test_p = buildpoly(tX_test, degree)
         else:
-            tX_train_p, tX_test_p = tX_train, test_set
+            tX_train_p, tX_test_p = tX, tX_test
         
         # 8. Train three seperate models of Ridge Regression on the datasets
         #print("Training")
-        _, w = ridge_regression(y_train_set, tX_train_p, lambda_)
+        _, w = ridge_regression(y_tX, tX_train_p, lambda_)
         models_trained.append(w)
         # 9. Predict
         #print("Predicting", tX_test_p.shape[0])
